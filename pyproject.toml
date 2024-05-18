@@ -1,0 +1,22 @@
+[tool.poetry]
+name = "nanami-chatbot"
+version = "0.1.0"
+description = ""
+authors = ["nijigen-plot"]
+readme = "README.md"
+packages = [{include = "nanami_chatbot"}]
+
+[tool.poetry.dependencies]
+python = "^3.11"
+python-dotenv = "^1.0.1"
+openai = "^1.30.1"
+requests = "^2.31.0"
+numpy = "^1.26.4"
+scipy = "^1.13.0"
+setuptools = "^69.5.1"
+pyaudio = "^0.2.14"
+
+
+[build-system]
+requires = ["poetry-core>=1.0.0"]
+build-backend = "poetry.core.masonry.api"
