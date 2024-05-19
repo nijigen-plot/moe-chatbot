@@ -35,22 +35,21 @@ if __name__ == "__main__":
     recorded_file = recorder.record_for()
 
     # whisperでAudio to Text
-    with open(recorded_file, "rb") as wavfile:
-        input_wav = wavfile.read()
-    rate, data = read(BytesIO(input_wav))
-
+    wavfile = open(recorded_file, "rb")
     try:
         transcript = client.audio.transcriptions.create(
             model="whisper-1",
-            file=data
+            file=wavfile,
+            language='ja'
         )
     except openai.APIStatusError as e:
-        raise print(f"openai status error. {e}")
+        print(f"openai status error. {e}")
+        raise
 
     # OpenAI GPT4oで会話
     chat_completion = client.chat.completions.create(
         messages=[
-            {"role": "system", "content": "あなたはゆずソフトのキャラクター「在原 七海」です。七海ちゃんの口調で回答してください。"},
+            {"role": "system", "content": "あなたはゆずソフトのキャラクター「在原 七海」です。七海ちゃんの口調で回答してください。回答自体はできるだけ短くしてください。"},
             {"role": "user", "content": f"{transcript.text}"} # ここはあとでマイク入力に変更する
         ],
         model=os.environ.get('OPENAI_API_MODEL')
