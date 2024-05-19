@@ -19,6 +19,7 @@ except:
 load_dotenv()
 p = pyaudio.PyAudio()
 CHUNK = 1024
+CARD_NUM = 2 # arecord -l で確認するスピーカーデバイス
 
 client = OpenAI(
     api_key=os.environ.get('OPENAI_API_KEY')
@@ -43,7 +44,7 @@ if __name__ == "__main__":
         with tempfile.NamedTemporaryFile(delete=False, suffix=".wav") as tmp_file:
             tmp_file.write(response.content)
             audio_file_path = tmp_file.name
-            
+            print(audio_file_path)
         with wave.open(audio_file_path, 'rb') as wf:
             # Instantiate PyAudio and initialize PortAudio system resources (1)
             p = pyaudio.PyAudio()
@@ -52,7 +53,8 @@ if __name__ == "__main__":
             stream = p.open(format=p.get_format_from_width(wf.getsampwidth()),
                             channels=wf.getnchannels(),
                             rate=wf.getframerate(),
-                            output=True)
+                            output=True # output_device_indexは指定せずデフォルトにする
+                        )
 
             # Play samples from the wave file (3)
             while len(data := wf.readframes(CHUNK)):  # Requires Python 3.8+ for :=
