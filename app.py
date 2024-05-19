@@ -9,7 +9,6 @@ from scipy.io.wavfile import read, write
 import pyaudio
 import requests
 from dotenv import load_dotenv
-from openai import OpenAI
 import openai
 from record import AudioRecorder
 
@@ -26,41 +25,41 @@ p = pyaudio.PyAudio()
 CHUNK = 1024
 CARD_NUM = 2 # arecord -l で確認するスピーカーデバイス
 
-client = OpenAI(
+client = openai.OpenAI(
     api_key=os.environ.get('OPENAI_API_KEY')
 )
 recorder = AudioRecorder()
 
 if __name__ == "__main__":
-	# 録音開始
-	recorded_file = recorder.record_for()
+    # 録音開始
+    recorded_file = recorder.record_for()
 
-	# whisperでAudio to Text
-	with open(recorded_file, "rb") as wavfile:
-		input_wav = wavfile.read()
-	rate, data = read(BytesIO(input_wav))
+    # whisperでAudio to Text
+    with open(recorded_file, "rb") as wavfile:
+        input_wav = wavfile.read()
+    rate, data = read(BytesIO(input_wav))
 
-	try:
-		transcript = client.audio.transcriptions.create(
-			model="whisper-1",
-			file=data
-		)
-	except openai.APIStatusError as e:
-		raise print(f"openai status error. {e}")
+    try:
+        transcript = client.audio.transcriptions.create(
+            model="whisper-1",
+            file=data
+        )
+    except openai.APIStatusError as e:
+        raise print(f"openai status error. {e}")
 
     # OpenAI GPT4oで会話
     chat_completion = client.chat.completions.create(
         messages=[
-            {"role":"system", "content": "あなたはゆずソフトのキャラクター「在原 七海」です。七海ちゃんの口調で回答してください。"},
-            {"role":"user", "content": f"{transcript.text}"} # ここはあとでマイク入力に変更する
+            {"role": "system", "content": "あなたはゆずソフトのキャラクター「在原 七海」です。七海ちゃんの口調で回答してください。"},
+            {"role": "user", "content": f"{transcript.text}"} # ここはあとでマイク入力に変更する
         ],
         model=os.environ.get('OPENAI_API_MODEL')
-        )
+    )
     answer = chat_completion.choices[0].message.content
     
     # nanami-moe-ttsで七海の声に変換
-    payload = {"text" : f"{answer}"}
-    headers = {"Content-Type" : "application/json"}
+    payload = {"text": f"{answer}"}
+    headers = {"Content-Type": "application/json"}
     response = requests.post(f"{url_arg}/run", headers=headers, data=json.dumps(payload))
     if response.ok:
         with tempfile.NamedTemporaryFile(delete=False, suffix=".wav") as tmp_file:
@@ -76,7 +75,7 @@ if __name__ == "__main__":
                             channels=wf.getnchannels(),
                             rate=wf.getframerate(),
                             output=True # output_device_indexは指定せずデフォルトにする
-                        )
+                            )
 
             # Play samples from the wave file (3)
             while len(data := wf.readframes(CHUNK)):  # Requires Python 3.8+ for :=
