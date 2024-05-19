@@ -3,11 +3,16 @@ import os
 import tempfile
 import wave
 import sys
+from io import BytesIO
 
+from scipy.io.wavfile import read, write
 import pyaudio
 import requests
 from dotenv import load_dotenv
 from openai import OpenAI
+import openai
+from record import AudioRecorder
+
 
 try:
     url_arg = sys.argv[1]
@@ -24,16 +29,33 @@ CARD_NUM = 2 # arecord -l で確認するスピーカーデバイス
 client = OpenAI(
     api_key=os.environ.get('OPENAI_API_KEY')
 )
+recorder = AudioRecorder()
 
 if __name__ == "__main__":
+	# 録音開始
+	recorded_file = recorder.record_for()
+
+	# whisperでAudio to Text
+	with open(recorded_file, "rb") as wavfile:
+		input_wav = wavfile.read()
+	rate, data = read(BytesIO(input_wav))
+
+	try:
+		transcript = client.audio.transcriptions.create(
+			model="whisper-1",
+			file=data
+		)
+	except openai.APIStatusError as e:
+		raise print(f"openai status error. {e}")
+
     # OpenAI GPT4oで会話
     chat_completion = client.chat.completions.create(
         messages=[
             {"role":"system", "content": "あなたはゆずソフトのキャラクター「在原 七海」です。七海ちゃんの口調で回答してください。"},
-            {"role":"user", "content": "こんにちは！"} # ここはあとでマイク入力に変更する
+            {"role":"user", "content": f"{transcript.text}"} # ここはあとでマイク入力に変更する
         ],
-        model=os.environ.get('OPENAI_API_MODEL'),
-    )
+        model=os.environ.get('OPENAI_API_MODEL')
+        )
     answer = chat_completion.choices[0].message.content
     
     # nanami-moe-ttsで七海の声に変換
