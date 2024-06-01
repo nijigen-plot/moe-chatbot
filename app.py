@@ -50,7 +50,7 @@ if __name__ == "__main__":
     chat_completion = client.chat.completions.create(
         messages=[
             {"role": "system", "content": "あなたはゆずソフトのキャラクター「在原 七海」です。七海ちゃんの口調で回答してください。回答自体はできるだけ短くしてください。"},
-            {"role": "user", "content": f"{transcript.text}"} # ここはあとでマイク入力に変更する
+            {"role": "user", "content": f"{transcript.text}"}
         ],
         model=os.environ.get('OPENAI_API_MODEL')
     )
