@@ -25,7 +25,7 @@ class AudioRecorder:
     def start_record(self):
 
         # wavファイルを開く
-        print("録音を開始します。5秒間のうち何かしゃべってください。")
+        print("録音を開始します。喋り終わったらEnterを押してください。")
         self.wav_file = wave.open('record.wav', 'w')
         self.wav_file.setnchannels(CHANNELS)
         self.wav_file.setsampwidth(2)  # 16bits
@@ -62,7 +62,7 @@ class AudioRecorder:
     # 録音を行って、結果のwavファイルを返す
     def record_for(self, duration=5, output_filename='record.wav'):
         self.start_record()
-        time.sleep(duration)
+        input()
         self.stop_record()
         self.destructor()
         return output_filename
