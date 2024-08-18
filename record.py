@@ -5,12 +5,14 @@ import wave
 CHUNK = 4096
 CHANNELS = 1
 FRAME_RATE = 44100
-CARD_NUM = 1 # PyAudioのget_device_count()のIndex番号を指定。
 
 class AudioRecorder:
     
     def __init__(self):
         self.audio = pyaudio.PyAudio()
+        for x in range(0, self.audio.get_device_count()):
+            if self.audio.get_device_info_by_index(x)['name'] == 'USB PnP Sound Device: Audio (hw:2,0)':
+                self.card_num = self.audio.get_device_info_by_index(x)['index']
         wav_file = None
         stream = None
 
@@ -35,7 +37,7 @@ class AudioRecorder:
         self.stream = self.audio.open(format=self.audio.get_format_from_width(self.wav_file.getsampwidth()),
                                       channels=self.wav_file.getnchannels(),
                                       rate=self.wav_file.getframerate(),
-                                      input_device_index=CARD_NUM,
+                                      input_device_index=self.card_num,
                                       input=True,
                                       output=False,
                                       frames_per_buffer=CHUNK,
