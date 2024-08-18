@@ -23,7 +23,7 @@ except:
 load_dotenv()
 p = pyaudio.PyAudio()
 CHUNK = 1024
-CARD_NUM = 2 # arecord -l で確認するスピーカーデバイス
+# CARD_NUM = 2 # arecord -l で確認するスピーカーデバイス
 
 client = openai.OpenAI(
     api_key=os.environ.get('OPENAI_API_KEY')
