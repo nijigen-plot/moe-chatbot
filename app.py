@@ -4,6 +4,7 @@ import tempfile
 import wave
 import sys
 from io import BytesIO
+import logging
 
 from scipy.io.wavfile import read, write
 import pyaudio
@@ -13,9 +14,22 @@ import openai
 from record import AudioRecorder
 
 
+# ロガーの設定
+logger = logging.getLogger()
+logger.setLevel(logging.INFO)
+console_handler = logging.StreamHandler()
+console_handler.setLevel(logging.INFO)
+file_handler = logging.FileHandler('app.log')
+file_handler.setLevel(logging.INFO)
+formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+console_handler.setFormatter(formatter)
+file_handler.setFormatter(formatter)
+logger.addHandler(console_handler)
+logger.addHandler(file_handler)
+
 try:
     url_arg = sys.argv[1]
-    print(f"URL = {url_arg}")
+    logger.info(f"URL : {url_arg}")
 
 except:
     raise ValueError("TTS APIアクセスの為のURLを引数にいれてください。")
@@ -42,9 +56,9 @@ if __name__ == "__main__":
             file=wavfile,
             language='ja'
         )
+        logger.info(f"Recorded Question : {transcript.text}")
     except openai.APIStatusError as e:
-        print(f"openai status error. {e}")
-        raise
+        raise (f"openai status error. {e}")
 
     # OpenAI GPT4oで会話
     chat_completion = client.chat.completions.create(
@@ -57,6 +71,7 @@ if __name__ == "__main__":
     answer = chat_completion.choices[0].message.content
     
     # nanami-moe-ttsで七海の声に変換
+    logger.info(f"Answer : {answer}")
     payload = {"text": f"{answer}"}
     headers = {"Content-Type": "application/json"}
     response = requests.post(f"{url_arg}/run", headers=headers, data=json.dumps(payload))
@@ -64,7 +79,7 @@ if __name__ == "__main__":
         with tempfile.NamedTemporaryFile(delete=False, suffix=".wav") as tmp_file:
             tmp_file.write(response.content)
             audio_file_path = tmp_file.name
-            print(audio_file_path)
+            logger.info(f"Answer Audio Path : {audio_file_path}")
         with wave.open(audio_file_path, 'rb') as wf:
             # Instantiate PyAudio and initialize PortAudio system resources (1)
             p = pyaudio.PyAudio()
