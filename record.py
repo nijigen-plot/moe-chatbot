@@ -5,7 +5,7 @@ import wave
 CHUNK = 4096
 CHANNELS = 1
 FRAME_RATE = 44100
-CARD_NUM = 2
+CARD_NUM = 1 # PyAudioのget_device_count()のIndex番号を指定。
 
 class AudioRecorder:
     
