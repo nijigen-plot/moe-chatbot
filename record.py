@@ -62,7 +62,7 @@ class AudioRecorder:
 
 
     # 録音を行って、結果のwavファイルを返す
-    def record_for(self, duration=5, output_filename='record.wav'):
+    def record_for(self, output_filename='record.wav'):
         self.start_record()
         input()
         self.stop_record()
