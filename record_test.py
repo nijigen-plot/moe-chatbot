@@ -7,7 +7,7 @@ CHANNELS = 1  # モノラル
 FRAME_RATE = 44100
 
 # カード番号
-CARD_NUM = 1 # PyAudioのget_device_count()のIndex番号を指定。
+CARD_NUM = 0 # PyAudioのget_device_count()のIndex番号を指定。
 
 
 class Audio:
